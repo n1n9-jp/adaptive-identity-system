@@ -10,6 +10,7 @@ const fontConfig = {
 
 const PARAMS = {
     font: 'Roboto Flex',
+    motion: 'Wave',
     speed: 0.02,
     baseColor: 50,
     contrast: 205, // 255max - 50base = 205
@@ -80,6 +81,15 @@ function setup() {
         }
     });
 
+    pane.addInput(PARAMS, 'motion', {
+        options: {
+            'Wave': 'Wave',
+            'Breath': 'Breath',
+            'Noise': 'Noise',
+            'Scan': 'Scan',
+        }
+    });
+
     pane.addInput(PARAMS, 'speed', { min: 0, max: 0.1 });
     pane.addInput(PARAMS, 'baseColor', { min: 0, max: 255 });
     pane.addInput(PARAMS, 'contrast', { min: 0, max: 255 });
@@ -92,24 +102,76 @@ function draw() {
     time += PARAMS.speed;
     let t = time;
 
-    // --- 1. Calculate and Normalize Row Heights ---
     let rowWeights = [];
-    let totalRowWeight = 0;
-
-    for (let r = 0; r < 5; r++) {
-        let w = 1.0 + 0.6 * sin(t * 0.7 + r * 1.2);
-        rowWeights.push(w);
-        totalRowWeight += w;
-    }
-
-    // --- 2. Calculate and Normalize Col Widths (Global) ---
     let colWeights = [];
+    let totalRowWeight = 0;
     let totalColWeight = 0;
 
-    for (let c = 0; c < 5; c++) {
-        let w = 1.0 + 0.6 * sin(t * 1.1 + c * 0.8);
-        colWeights.push(w);
-        totalColWeight += w;
+    // --- Calculate Weights based on Motion Type ---
+    if (PARAMS.motion === 'Wave') {
+        for (let r = 0; r < 5; r++) {
+            let w = 1.0 + 0.6 * sin(t * 0.7 + r * 1.2);
+            rowWeights.push(w);
+            totalRowWeight += w;
+        }
+        for (let c = 0; c < 5; c++) {
+            let w = 1.0 + 0.6 * sin(t * 1.1 + c * 0.8);
+            colWeights.push(w);
+            totalColWeight += w;
+        }
+    } else if (PARAMS.motion === 'Breath') {
+        for (let r = 0; r < 5; r++) {
+            let w = 1.0 + 0.5 * sin(t);
+            rowWeights.push(w);
+            totalRowWeight += w;
+        }
+        for (let c = 0; c < 5; c++) {
+            let w = 1.0 + 0.5 * sin(t * 0.9); // Slightly different phase freq
+            colWeights.push(w);
+            totalColWeight += w;
+        }
+    } else if (PARAMS.motion === 'Noise') {
+        for (let r = 0; r < 5; r++) {
+            // Use noise(t, index)
+            let w = map(noise(t * 0.5, r * 10), 0, 1, 0.4, 2.0);
+            rowWeights.push(w);
+            totalRowWeight += w;
+        }
+        for (let c = 0; c < 5; c++) {
+            let w = map(noise(t * 0.5, c * 10 + 100), 0, 1, 0.4, 2.0);
+            colWeights.push(w);
+            totalColWeight += w;
+        }
+    } else if (PARAMS.motion === 'Scan') {
+        // A peak moves across
+        let phase = (t * 0.5) % 5; // 0 to 5
+        for (let r = 0; r < 5; r++) {
+            let dist = abs(r - phase);
+            // Create a bell curve bump
+            let w = 1.0 + 2.0 * exp(-dist * dist * 2);
+            rowWeights.push(w);
+            totalRowWeight += w;
+        }
+        // Horizontal scan with different speed
+        let catPhase = (t * 0.7 + 2.5) % 5;
+        for (let c = 0; c < 5; c++) {
+            let dist = abs(c - catPhase);
+            let w = 1.0 + 2.0 * exp(-dist * dist * 2);
+            colWeights.push(w);
+            totalColWeight += w;
+        }
+    } else {
+        // Fallback default (Wave)
+        for (let r = 0; r < 5; r++) {
+            let w = 1.0 + 0.6 * sin(t * 0.7 + r * 1.2);
+            rowWeights.push(w);
+            totalRowWeight += w;
+        }
+        for (let c = 0; c < 5; c++) {
+            let w = 1.0 + 0.6 * sin(t * 1.1 + c * 0.8);
+            colWeights.push(w);
+            totalColWeight += w;
+        }
     }
 
     // Apply Styles
