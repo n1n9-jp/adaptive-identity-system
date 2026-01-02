@@ -1,0 +1,103 @@
+body, html {
+    margin: 0;
+    padding: 0;
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    background-color: #1a1a1a;
+    font-family: 'Roboto Flex', sans-serif;
+}
+
+#canvas-container {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 0;
+}
+
+#overlay-container {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 1;
+    pointer-events: none;
+    display: flex;
+    flex-direction: column; /* Stack rows vertically */
+    justify-content: center;
+    align-items: center;
+}
+
+.grid-row {
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    align-items: center;
+    width: 100%; /* Or auto, depending on desired compaction */
+}
+
+.char-block {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    box-sizing: border-box;
+    overflow: hidden;
+    background-color: #fff;
+    color: #000;
+    /* Width/Height will be set by JS in % */
+    width: 0; 
+    height: 100%; /* Fill the row height */
+    flex-grow: 0; /* We control width explicitly */
+    margin: 0; 
+    border: 1px solid #000; /* Define boundary */
+    will-change: width, height, font-size, font-variation-settings;
+}
+
+.char-content {
+    line-height: 1;
+    white-space: nowrap;
+    text-align: center;
+    display: inline-block; /* Allow natural width behavior for measurement */
+    transform-origin: center center;
+}
+
+/* UI Controls */
+#ui-controls {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    z-index: 100;
+}
+
+#font-selector {
+    background: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    color: white;
+    padding: 8px 16px;
+    border-radius: 8px;
+    font-family: inherit;
+    font-size: 14px;
+    cursor: pointer;
+    outline: none;
+    transition: all 0.3s ease;
+    appearance: none;
+    -webkit-appearance: none;
+    background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='white' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
+    background-repeat: no-repeat;
+    background-position: right 8px center;
+    background-size: 16px;
+    padding-right: 32px;
+}
+
+#font-selector:hover {
+    background-color: rgba(255, 255, 255, 0.2);
+}
+
+#font-selector option {
+    background-color: #1a1a1a;
+    color: white;
+}
