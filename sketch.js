@@ -8,7 +8,17 @@ const fontConfig = {
     'Inconsolata': { family: "'Inconsolata', monospace", wdth: [50, 200], wght: [200, 900] }
 };
 
+const PARAMS = {
+    font: 'Roboto Flex',
+    speed: 0.02,
+    baseColor: 50,
+    contrast: 205, // 255max - 50base = 205
+    text: 'TOKYO'
+};
+
 let currentFont = fontConfig['Roboto Flex'];
+let time = 0;
+let pane;
 
 function setup() {
     let canvas = createCanvas(windowWidth, windowHeight);
@@ -52,19 +62,35 @@ function setup() {
         });
     }
 
-    const selector = document.getElementById('font-selector');
-    if (selector) {
-        selector.addEventListener('change', (e) => {
-            if (fontConfig[e.target.value]) {
-                currentFont = fontConfig[e.target.value];
-            }
-        });
-    }
+    // --- Tweakpane Setup ---
+    pane = new Tweakpane.Pane({
+        title: 'Settings',
+    });
+
+    pane.addInput(PARAMS, 'font', {
+        options: {
+            'Roboto Flex': 'Roboto Flex',
+            'Open Sans': 'Open Sans',
+            'Encode Sans': 'Encode Sans',
+            'Inconsolata': 'Inconsolata',
+        },
+    }).on('change', (ev) => {
+        if (fontConfig[ev.value]) {
+            currentFont = fontConfig[ev.value];
+        }
+    });
+
+    pane.addInput(PARAMS, 'speed', { min: 0, max: 0.1 });
+    pane.addInput(PARAMS, 'baseColor', { min: 0, max: 255 });
+    pane.addInput(PARAMS, 'contrast', { min: 0, max: 255 });
 }
 
 function draw() {
     clear();
-    let t = millis() * 0.002;
+
+    // Accumulate time based on user speed
+    time += PARAMS.speed;
+    let t = time;
 
     // --- 1. Calculate and Normalize Row Heights ---
     let rowWeights = [];
@@ -120,7 +146,8 @@ function draw() {
 
             // --- Color Mapping ---
             let relativeArea = rowWeights[r] * colWeights[c];
-            let lightness = map(relativeArea, 0.3, 2.2, 50, 255, true);
+            let maxLightness = Math.min(255, PARAMS.baseColor + PARAMS.contrast);
+            let lightness = map(relativeArea, 0.3, 2.2, PARAMS.baseColor, maxLightness, true);
             block.div.style.backgroundColor = `rgb(${lightness}, ${lightness}, ${lightness})`;
 
             // --- Geometric Force Stretch ---
