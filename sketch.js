@@ -120,7 +120,7 @@ function draw() {
 
             // --- Color Mapping ---
             let relativeArea = rowWeights[r] * colWeights[c];
-            let lightness = map(relativeArea, 0.3, 2.2, 200, 255, true);
+            let lightness = map(relativeArea, 0.3, 2.2, 50, 255, true);
             block.div.style.backgroundColor = `rgb(${lightness}, ${lightness}, ${lightness})`;
 
             // --- Geometric Force Stretch ---
