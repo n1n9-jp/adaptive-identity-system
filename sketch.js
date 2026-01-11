@@ -11,9 +11,8 @@ const fontConfig = {
 const PARAMS = {
     font: 'Roboto Flex',
     motion: 'Wave',
+    scheme: 'Greys',
     speed: 0.02,
-    baseColor: 50,
-    contrast: 205, // 255max - 50base = 205
     text: 'TOKYO'
 };
 
@@ -90,9 +89,26 @@ function setup() {
         }
     });
 
+    pane.addInput(PARAMS, 'scheme', {
+        options: {
+            'Greys': 'Greys',
+            'Viridis': 'Viridis',
+            'Magma': 'Magma',
+            'Inferno': 'Inferno',
+            'Plasma': 'Plasma',
+            'Cividis': 'Cividis',
+            'Turbo': 'Turbo',
+            'Cool': 'Cool',
+            'Warm': 'Warm',
+            'Blues': 'Blues',
+            'Greens': 'Greens',
+            'Oranges': 'Oranges',
+            'Purples': 'Purples',
+            'Reds': 'Reds',
+        }
+    });
+
     pane.addInput(PARAMS, 'speed', { min: 0, max: 0.1 });
-    pane.addInput(PARAMS, 'baseColor', { min: 0, max: 255 });
-    pane.addInput(PARAMS, 'contrast', { min: 0, max: 255 });
 }
 
 function draw() {
@@ -208,9 +224,15 @@ function draw() {
 
             // --- Color Mapping ---
             let relativeArea = rowWeights[r] * colWeights[c];
-            let maxLightness = Math.min(255, PARAMS.baseColor + PARAMS.contrast);
-            let lightness = map(relativeArea, 0.3, 2.2, PARAMS.baseColor, maxLightness, true);
-            block.div.style.backgroundColor = `rgb(${lightness}, ${lightness}, ${lightness})`;
+
+            // Normalize area for D3 interpolation (0 to 1)
+            let tColor = map(relativeArea, 0.3, 2.2, 0, 1, true);
+            let colorFunc = d3[`interpolate${PARAMS.scheme}`];
+            if (colorFunc) {
+                let cStr = colorFunc(tColor);
+                block.div.style.backgroundColor = cStr;
+                block.div.style.color = '#000';
+            }
 
             // --- Geometric Force Stretch ---
             let naturalWidth = block.span.offsetWidth;
